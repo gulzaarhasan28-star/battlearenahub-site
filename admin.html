@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arena Pro | Admin</title>
+
+<script>
+const ADMIN_PIN="7860";
+if(prompt("Enter Admin PIN")!==ADMIN_PIN){
+ alert("Access Denied");document.body.innerHTML="";
+}
+</script>
+
+<style>
+body{background:#020617;color:#fff;font-family:Inter;padding:20px}
+.card{background:#1e293b;border-radius:14px;padding:16px;margin-bottom:16px}
+input,button{width:100%;padding:10px;margin:6px 0;border-radius:8px;border:none}
+button{background:#3b82f6;color:#fff;font-weight:600}
+.warn{background:#ef4444}
+pre{background:#020617;padding:10px;border-radius:10px}
+</style>
+</head>
+
+<body>
+
+<h2>Admin Panel</h2>
+
+<div class="card">
+<h3>Create Tournament</h3>
+<input id="name" placeholder="Name">
+<input id="game" placeholder="Game">
+<input id="date" placeholder="Date">
+<input id="slots" type="number" placeholder="Slots">
+<input id="cost" type="number" placeholder="Ticket Cost">
+<button onclick="create()">Create</button>
+</div>
+
+<div class="card">
+<h3>Manage Tournaments</h3>
+<div id="list"></div>
+</div>
+
+<div class="card">
+<h3>📊 Analytics</h3>
+<pre id="stats"></pre>
+</div>
+
+<div class="card">
+<h3>🛡️ User Control</h3>
+<button class="warn" onclick="resetUser()">Reset User Flags</button>
+</div>
+
+<script>
+let tournaments=JSON.parse(localStorage.tournaments||"[]");
+
+function save(){localStorage.tournaments=JSON.stringify(tournaments);render()}
+function create(){
+ tournaments.push({
+  id:"T"+Date.now(),
+  name:name.value,game:game.value,date:date.value,
+  slots:+slots.value,joined:0,cost:+cost.value,status:"Open"
+ });save()
+}
+function render(){
+ list.innerHTML="";
+ tournaments.forEach(t=>{
+  list.innerHTML+=`
+  <div>
+   <b>${t.name}</b><br>
+   🎟️ ${t.cost} • 👥 ${t.joined}/${t.slots}<br>
+   <button onclick="t.status='Open';save()">Open</button>
+   <button onclick="t.status='Closed';save()">Close</button>
+   <button onclick="tournaments=tournaments.filter(x=>x.id!='${t.id}');save()">Delete</button>
+  </div><hr>`
+ })
+ stats.innerText=JSON.stringify(JSON.parse(localStorage.analytics||"{}"),null,2)
+}
+function resetUser(){
+ let u=JSON.parse(localStorage.user||"null");
+ if(u){u.flag=false;u.earned=0;localStorage.user=JSON.stringify(u);alert("Reset")}
+}
+render();
+</script>
+</body>
+</html>
