@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ludo Game - Earn Tickets</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { 
+            background: #2c3e50; 
+            color: white; 
+            font-family: Arial;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+        
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .back-btn {
+            background: #34495e;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .ludo-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .ludo-board {
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(135deg, #3498db, #8e44ad);
+            border-radius: 20px;
+            position: relative;
+            margin: 20px 0;
+            border: 5px solid #ecf0f1;
+        }
+        
+        .home-base {
+            position: absolute;
+            width: 40%;
+            height: 40%;
+            border-radius: 15px;
+        }
+        
+        .red-home { background: #e74c3c; top:5%; left:5%; }
+        .green-home { background: #2ecc71; top:5%; right:5%; }
+        .yellow-home { background: #f39c12; bottom:5%; left:5%; }
+        .blue-home { background: #3498db; bottom:5%; right:5%; }
+        
+        .player-piece {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            z-index: 10;
+        }
+        
+        .piece-red { background: #e74c3c; }
+        .piece-green { background: #2ecc71; }
+        .piece-yellow { background: #f39c12; }
+        .piece-blue { background: #3498db; }
+        
+        .game-controls {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .dice {
+            font-size: 60px;
+            margin: 20px 0;
+            cursor: pointer;
+            animation: diceRoll 1s infinite;
+        }
+        
+        .roll-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        
+        .ticket-counter {
+            background: rgba(52, 152, 219, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .ad-offer {
+            background: linear-gradient(135deg, #9b59b6, #e74c3c);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .ad-btn {
+            background: white;
+            color: #9b59b6;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        
+        @keyframes diceRoll {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Game Header -->
+    <div class="game-header">
+        <button class="back-btn" onclick="exitGame()">←</button>
+        <h2>🎲 Ludo Game</h2>
+        <div style="color:#f1c40f;">
+            🎫 <span id="ludoTickets">0</span>
+        </div>
+    </div>
+    
+    <!-- Ticket Counter -->
+    <div class="ticket-counter">
+        <h3>⏰ Earning 1 Ticket per Minute</h3>
+        <p>Time Played: <span id="ludoTime">0</span> seconds</p>
+    </div>
+    
+    <div class="ludo-container">
+        <!-- Ludo Board -->
+        <div class="ludo-board" id="ludoBoard">
+            <div class="home-base red-home"></div>
+            <div class="home-base green-home"></div>
+            <div class="home-base yellow-home"></div>
+            <div class="home-base blue-home"></div>
+            
+            <!-- Pieces will be added by JavaScript -->
+        </div>
+        
+        <!-- Game Controls -->
+        <div class="game-controls">
+            <div class="dice" id="dice" onclick="rollDice()">🎲</div>
+            <button class="roll-btn" onclick="rollDice()">ROLL DICE</button>
+            
+            <div style="margin-top:20px;">
+                <p>Current Player: <span id="currentPlayer" style="color:#f1c40f;">You</span></p>
+                <p>Dice Value: <span id="diceValue">0</span></p>
+            </div>
+        </div>
+        
+        <!-- Ad Offer -->
+        <div class="ad-offer">
+            <h3>🎁 Need Extra Roll?</h3>
+            <p>Watch ad for extra dice roll!</p>
+            <button class="ad-btn" onclick="watchAdForExtraRoll()">
+                📺 Watch Ad for Extra Roll
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Ludo Game Variables
+        let gameTime = 0;
+        let ticketsEarned = 0;
+        let timeInterval;
+        let currentPlayer = 0;
+        let diceValue = 0;
+        const players = ['red', 'green', 'yellow', 'blue'];
+        
+        // Initialize Game
+        function initGame() {
+            createBoard();
+            startTicketTimer();
+        }
+        
+        // Create Ludo Board
+        function createBoard() {
+            const board = document.getElementById('ludoBoard');
+            
+            // Create pieces for each player
+            players.forEach((color, playerIndex) => {
+                const positions = [
+                    {top: '10%', left: '10%'},
+                    {top: '10%', left: '30%'},
+                    {top: '30%', left: '10%'},
+                    {top: '30%', left: '30%'}
+                ];
+                
+                positions.forEach((pos, pieceIndex) => {
+                    const piece = document.createElement('div');
+                    piece.className = `player-piece piece-${color}`;
+                    piece.style.top = pos.top;
+                    piece.style.left = pos.left;
+                    piece.textContent = pieceIndex + 1;
+                    piece.setAttribute('data-player', playerIndex);
+                    piece.setAttribute('data-piece', pieceIndex);
+                    piece.onclick = () => selectPiece(playerIndex, pieceIndex);
+                    board.appendChild(piece);
+                });
+            });
+        }
+        
+        // Start Ticket Timer
+        function startTicketTimer() {
+            timeInterval = setInterval(() => {
+                gameTime++;
+                document.getElementById('ludoTime').textContent = gameTime;
+                
+                // Earn 1 ticket every 60 seconds
+                if(gameTime % 60 === 0) {
+                    earnTicket(1);
+                }
+            }, 1000);
+        }
+        
+        // Earn Ticket
+        function earnTicket(amount) {
+            ticketsEarned += amount;
+            document.getElementById('ludoTickets').textContent = ticketsEarned;
+            
+            // Save to localStorage
+            const currentTickets = parseInt(localStorage.getItem('userTickets') || 0);
+            const newTickets = currentTickets + amount;
+            localStorage.setItem('userTickets', newTickets);
+            
+            // Show notification
+            showNotification(`+${amount} ticket earned!`);
+        }
+        
+        // Roll Dice
+        function rollDice() {
+            diceValue = Math.floor(Math.random() * 6) + 1;
+            document.getElementById('diceValue').textContent = diceValue;
+            
+            // Animate dice
+            const dice = document.getElementById('dice');
+            dice.style.animation = 'none';
+            setTimeout(() => {
+                dice.style.animation = 'diceRoll 0.5s';
+            }, 10);
+            
+            // Move to next player
+            setTimeout(() => {
+                currentPlayer = (currentPlayer + 1) % 4;
+                document.getElementById('currentPlayer').textContent = 
+                    ['You', 'Player 2', 'Player 3', 'Player 4'][currentPlayer];
+                document.getElementById('currentPlayer').style.color = 
+                    ['#f1c40f', '#2ecc71', '#3498db', '#9b59b6'][currentPlayer];
+            }, 500);
+        }
+        
+        // Select Piece
+        function selectPiece(player, piece) {
+            if(player === 0) { // Only user can move their pieces
+                // Move piece logic here
+                showNotification(`Moving piece ${piece + 1} by ${diceValue} steps`);
+            }
+        }
+        
+        // Watch Ad for Extra Roll
+        function watchAdForExtraRoll() {
+            // Simulate ad watching
+            if(confirm('Watch a 30-second ad for extra dice roll?')) {
+                setTimeout(() => {
+                    alert('Ad complete! You got an extra roll!');
+                    rollDice(); // Extra roll
+                }, 1000);
+            }
+        }
+        
+        // Show Notification
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0,0,0,0.8);
+                color: #FFD700;
+                padding: 10px 20px;
+                border-radius: 10px;
+                z-index: 1000;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 2000);
+        }
+        
+        // Exit Game
+        function exitGame() {
+            clearInterval(timeInterval);
+            if(confirm('Exit game? Tickets earned will be saved.')) {
+                window.location.href = 'index.html';
+            }
+        }
+        
+        // Initialize
+        window.onload = initGame;
+    </script>
+</body>
+</html>
