@@ -1,264 +1,283 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="monetag" content="c49ccf84380e74c2a3c3a3002e9e8802">
-<title>Tic Tac Toe Pro</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- ✅ MONETAG OFFICIAL VERIFICATION -->
+  <meta name="monetag" content="c49ccf84380e74c2a3c3a3002e9e8802">
+  <title>⚡ TIC TAC TOE · PRODUCTION GRADE</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  
+  <!-- Firebase v8.10.0 -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-<style>
-body{
-margin:0;
-font-family:'Orbitron',sans-serif;
-background:radial-gradient(circle at top,#1a0033,#050010);
-color:#fff;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-}
-
-.container{
-text-align:center;
-width:360px;
-}
-
-h1{
-margin-bottom:20px;
-}
-
-button{
-background:#111;
-color:#fff;
-border:2px solid #00f6ff;
-padding:10px 20px;
-margin:5px;
-cursor:pointer;
-border-radius:8px;
-box-shadow:0 0 15px #00f6ff;
-}
-
-button:hover{
-box-shadow:0 0 25px #00f6ff;
-}
-
-.board{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:10px;
-margin-top:20px;
-}
-
-.cell{
-height:100px;
-background:#0b001a;
-border:2px solid #6b21a8;
-font-size:40px;
-display:flex;
-justify-content:center;
-align-items:center;
-cursor:pointer;
-}
-
-.status{
-margin-top:15px;
-font-size:14px;
-}
-.hidden{display:none;}
-</style>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: radial-gradient(circle at 20% 10%, #0b001c, #010002); font-family: 'Orbitron', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 16px; color: white; }
+    .container { max-width: 550px; width: 100%; background: rgba(5, 2, 15, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 60px 60px 40px 40px; padding: 30px 24px; box-shadow: 0 0 50px #00ffff30, 0 0 0 2px #a855f7 inset; }
+    h1 { font-size: 28px; font-weight: 900; text-align: center; letter-spacing: 6px; text-transform: uppercase; background: linear-gradient(45deg, #f0f, #0ff, #f0f); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 20px cyan); margin-bottom: 20px; }
+    .btn-group { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin: 20px 0; }
+    .btn { background: black; border: 2px solid #0ff; color: white; font-family: 'Orbitron', sans-serif; font-weight: 700; padding: 14px 28px; border-radius: 50px; font-size: 16px; letter-spacing: 3px; cursor: pointer; box-shadow: 0 0 15px #0ff; transition: 0.2s; flex: 1 1 160px; }
+    .btn:hover { background: #0ff1; border-color: white; box-shadow: 0 0 40px #0ff, 0 0 20px #0ff inset; }
+    .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 30px 0 20px; }
+    .cell { aspect-ratio: 1/1; background: radial-gradient(circle at 30% 30%, #200040, #050010); border: 2px solid #b300ff; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 58px; font-weight: bold; color: white; text-shadow: 0 0 20px #0ff, 0 0 40px #f0f; box-shadow: 0 0 15px #a020f0; transition: 0.1s; cursor: pointer; }
+    .cell:active { transform: scale(0.92); border-color: cyan; box-shadow: 0 0 45px cyan; }
+    .win-glow { border: 4px solid gold !important; box-shadow: 0 0 60px gold, 0 0 20px orange inset !important; }
+    .status { background: #03000c; border: 1px solid #3b82f6; border-radius: 60px; padding: 16px; margin: 15px 0; text-align: center; font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: #bff0ff; box-shadow: 0 0 15px #2563eb; backdrop-filter: blur(5px); text-transform: uppercase; }
+    .action-row { display: flex; gap: 14px; margin-top: 10px; }
+    .action-btn { background: #10001c; border: 1.5px solid #f0f; color: white; padding: 12px 18px; border-radius: 40px; font-weight: 700; font-family: 'Orbitron', sans-serif; font-size: 14px; letter-spacing: 2px; cursor: pointer; box-shadow: 0 0 12px #f0f; flex: 1; }
+    .action-btn:hover { background: #c026d0; border-color: cyan; box-shadow: 0 0 35px cyan; }
+    .hidden { display: none !important; }
+    .ad-footer { margin-top: 35px; padding-top: 15px; border-top: 1px dashed #38bdf8; text-align: center; font-size: 9px; color: #6b7280; letter-spacing: 4px; }
+    @media (max-width: 450px) { .container { padding: 20px; } .cell { font-size: 48px; } h1 { font-size: 22px; } }
+  </style>
 </head>
-
 <body>
-
 <div class="container">
-
-<h1>⚡ Tic Tac Toe Pro</h1>
-
-<div id="menu">
-<button onclick="startAI()">Play vs AI</button>
-<button onclick="startMulti()">Play Multiplayer</button>
-</div>
-
-<div id="game" class="hidden">
-<div id="board" class="board"></div>
-<div id="status" class="status"></div>
-<button onclick="resetGame()">Restart</button>
-<button onclick="location.reload()">Back</button>
-</div>
-
+  <h1>⚡ PRO T3 · SECURE</h1>
+  <div id="menuPanel" class="btn-group">
+    <button id="aiModeBtn" class="btn">🧠 VS AI</button>
+    <button id="multiModeBtn" class="btn">🌐 ONLINE</button>
+  </div>
+  <div id="gamePanel" class="hidden">
+    <div id="boardGrid" class="board"></div>
+    <div id="statusMsg" class="status">⚡ INITIALIZING</div>
+    <div class="action-row">
+      <button id="restartGameBtn" class="action-btn">⟳ RESTART</button>
+      <button id="exitGameBtn" class="action-btn">⏻ EXIT</button>
+    </div>
+  </div>
+  
+  <!-- ✅ MONETAG OFFICIAL ZONE - SAFE, HIGH EARNING -->
+  <div class="ad-footer">
+    <span>◈ MONETAG · OFFICIAL ◈</span>
+    <script src="https://publisher.monetag.com/zone/210346?source=direct" async data-cfasync="false"></script>
+  </div>
 </div>
 
 <script>
-/* ================= FIREBASE ================= */
+  // ---------- FIREBASE ----------
+  const firebaseConfig = {
+    apiKey: "AIzaSyDCmXCdvLV8--2ZXYmCpAgLR3cogj0cGG8",
+    authDomain: "freegm-4601f.firebaseapp.com",
+    databaseURL: "https://freegm-4601f-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "freegm-4601f",
+    storageBucket: "freegm-4601f.appspot.com",
+    messagingSenderId: "30234171811",
+    appId: "1:30234171811:web:70a6c3cfd365a874cfa216"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-const firebaseConfig = {
-apiKey: "AIzaSyDCmXCdvLV8--2ZXYmCpAgLR3cogj0cGG8",
-authDomain: "freegm-4601f.firebaseapp.com",
-databaseURL: "https://freegm-4601f-default-rtdb.asia-southeast1.firebasedatabase.app",
-projectId: "freegm-4601f",
-storageBucket: "freegm-4601f.appspot.com",
-messagingSenderId: "30234171811",
-appId: "1:30234171811:web:70a6c3cfd365a874cfa216"
-};
+  // ---------- STATE ----------
+  let board = ["","","","","","","","",""];
+  let current = "X";
+  let mode = "";
+  let mySymbol = null;
+  let gameRef = null;
+  let waitingRef = null;
+  let aiTimer = null;
+  let gameListener = null;
+  let gamesListener = null;
+  
+  let adShown = false;
 
-firebase.initializeApp(firebaseConfig);
-const db=firebase.database();
+  const winPatterns = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
 
-/* ================= GAME ================= */
+  // ---------- SAFE INTERSTITIAL (ONCE PER SESSION) ----------
+  function triggerInterstitial() {
+    if (!adShown && typeof mntg !== 'undefined' && mntg.showInterstitial) {
+      adShown = true;
+      try { mntg.showInterstitial(); } catch (e) {}
+    }
+  }
 
-let board=["","","","","","","","",""];
-let current="X";
-let mode="";
-let gameRef=null;
-let mySymbol=null;
+  function render() {
+    const el = document.getElementById("boardGrid");
+    el.innerHTML = "";
+    board.forEach((val,i)=>{
+      const c=document.createElement("div");
+      c.className="cell";
+      c.textContent=val;
+      c.onclick=()=>move(i);
+      el.appendChild(c);
+    });
+  }
 
-const winComb=[
-[0,1,2],[3,4,5],[6,7,8],
-[0,3,6],[1,4,7],[2,5,8],
-[0,4,8],[2,4,6]
-];
+  function winner() {
+    for(let p of winPatterns) if(board[p[0]]&&board[p[0]]===board[p[1]]&&board[p[1]]===board[p[2]]) return board[p[0]];
+    return board.includes("")?null:"draw";
+  }
 
-function createBoard(){
-const b=document.getElementById("board");
-b.innerHTML="";
-board.forEach((v,i)=>{
-const c=document.createElement("div");
-c.className="cell";
-c.innerText=v;
-c.onclick=()=>move(i);
-b.appendChild(c);
-});
-}
+  function glowWinner() {
+    for(let p of winPatterns) if(board[p[0]]&&board[p[0]]===board[p[1]]&&board[p[1]]===board[p[2]]) {
+      document.querySelectorAll(".cell").forEach((c,i)=>{if(p.includes(i))c.classList.add("win-glow");});
+      break;
+    }
+  }
 
-function checkWin(){
-for(let c of winComb){
-if(board[c[0]]&&board[c[0]]===board[c[1]]&&board[c[1]]===board[c[2]]){
-return board[c[0]];
-}
-}
-if(!board.includes("")) return "draw";
-return null;
-}
+  function aiMove() {
+    for(let i=0;i<9;i++)if(board[i]===""){board[i]="O";if(winner()==="O"){board[i]="";return i;}board[i]="";}
+    for(let i=0;i<9;i++)if(board[i]===""){board[i]="X";if(winner()==="X"){board[i]="";return i;}board[i]="";}
+    if(board[4]==="") return 4;
+    let c=[0,2,6,8].filter(i=>board[i]===""); if(c.length) return c[Math.random()*c.length|0];
+    let e=board.map((v,i)=>v===""?i:null).filter(v=>v!==null); return e.length?e[Math.random()*e.length|0]:null;
+  }
 
-function move(i){
-if(board[i]!==""||checkWin()) return;
+  function aiTurn() {
+    if(mode!=="AI"||current!=="O"||winner()) return;
+    if(aiTimer) clearTimeout(aiTimer);
+    aiTimer=setTimeout(()=>{
+      if(mode==="AI"&current==="O"&&!winner()){
+        let idx=aiMove();
+        if(idx!==null&&board[idx]===""){
+          board[idx]="O"; current="X"; updateUI();
+          if(winner()) triggerInterstitial();
+        }
+      }
+    },320);
+  }
 
-if(mode==="AI"){
-board[i]=current;
-current="O";
-aiMove();
-}else{
-if(current!==mySymbol) return;
-gameRef.transaction(g=>{
-if(!g||g.board[i]!==""||g.turn!==mySymbol) return g;
-g.board[i]=mySymbol;
-g.turn=mySymbol==="X"?"O":"X";
-return g;
-});
-}
-update();
-}
+  function move(i) {
+    if(board[i]!==""||winner()) return;
+    if(mode==="AI"){
+      if(current!=="X") return;
+      board[i]="X"; current="O"; updateUI();
+      if(winner()){ triggerInterstitial(); return; }
+      aiTurn();
+    } else if(mode==="MULTI"){
+      if(!gameRef||current!==mySymbol) return;
+      gameRef.transaction(g=>{
+        if(!g||g.board[i]!==""||g.turn!==mySymbol) return;
+        g.board[i]=mySymbol; g.turn=mySymbol==="X"?"O":"X"; return g;
+      });
+    }
+  }
 
-function aiMove(){
-let empty=board.map((v,i)=>v===""?i:null).filter(v=>v!==null);
-if(empty.length===0) return;
-let r=empty[Math.floor(Math.random()*empty.length)];
-board[r]="O";
-current="X";
-update();
-}
+  function updateUI() {
+    render();
+    let w=winner();
+    let s=document.getElementById("statusMsg");
+    if(w){
+      if(w==="draw") s.innerText="✨ DRAW ✨";
+      else{ s.innerText=`🏆 ${w} VICTORY`; glowWinner(); }
+    } else {
+      if(mode==="AI") s.innerText=current==="X"?"🌀 YOUR TURN":"🤖 AI TURN";
+      else if(mode==="MULTI"){
+        if(!mySymbol) s.innerText="🔗 MATCHMAKING...";
+        else s.innerText=current===mySymbol?`⚔️ YOUR TURN (${mySymbol})`:`⏳ OPPONENT (${current})`;
+      }
+    }
+  }
 
-function update(){
-createBoard();
-let w=checkWin();
-if(w){
-document.getElementById("status").innerText=
-w==="draw"?"Match Draw":w+" Wins!";
-}else{
-document.getElementById("status").innerText=
-mode==="AI"?(current==="X"?"Your Turn":"AI Turn"):
-(current===mySymbol?"Your Turn":"Opponent Turn");
-}
-}
+  function reset() {
+    if(aiTimer) clearTimeout(aiTimer);
+    board=["","","","","","","","",""]; current="X";
+    if(mode==="MULTI"&&gameRef) gameRef.update({board:["","","","","","","","",""],turn:"X"});
+    else updateUI();
+  }
 
-function resetGame(){
-board=["","","","","","","","",""];
-current="X";
-update();
-}
+  function exit() {
+    if(aiTimer) clearTimeout(aiTimer);
+    if(gameListener&&gameRef){ gameRef.off("value",gameListener); gameListener=null; }
+    if(gamesListener){ db.ref("games").off("child_added",gamesListener); gamesListener=null; }
+    
+    if(gameRef&&mySymbol) {
+      gameRef.child("players/"+mySymbol).onDisconnect().cancel();
+      gameRef.child("players/"+mySymbol).set(null);
+    }
+    if(waitingRef){ waitingRef.remove(); waitingRef=null; }
+    if(gameRef){ gameRef=null; }
+    
+    board=["","","","","","","","",""]; current="X"; mode=""; mySymbol=null;
+    document.getElementById("menuPanel").classList.remove("hidden");
+    document.getElementById("gamePanel").classList.add("hidden");
+  }
 
-/* ================= AI MODE ================= */
+  function startAI() { exit(); mode="AI"; board=["","","","","","","","",""]; current="X"; 
+    document.getElementById("menuPanel").classList.add("hidden");
+    document.getElementById("gamePanel").classList.remove("hidden"); updateUI(); }
 
-function startAI(){
-mode="AI";
-document.getElementById("menu").classList.add("hidden");
-document.getElementById("game").classList.remove("hidden");
-createBoard();
-update();
-}
+  function startMulti() {
+    exit();
+    mode="MULTI"; mySymbol=null; 
+    board=["","","","","","","","",""];
+    document.getElementById("menuPanel").classList.add("hidden");
+    document.getElementById("gamePanel").classList.remove("hidden");
+    document.getElementById("statusMsg").innerText="🔮 LOBBY · SEARCHING";
 
-/* ================= MULTIPLAYER ================= */
+    const pid="p_"+Math.random().toString(36).substr(2,12);
+    const waitRoot=db.ref("waiting");
+    
+    waitRoot.transaction(waitObj=>{
+      if(waitObj===null) {
+        let newWait={}; newWait[pid]=true; return newWait;
+      } else {
+        let opp=Object.keys(waitObj)[0];
+        let gid=db.ref("games").push().key;
+        db.ref("games/"+gid).set({
+          board:["","","","","","","","",""],
+          turn:"X",
+          players:{X:opp,O:pid}
+        });
+        mySymbol="O";
+        connectGame(gid,pid);
+        return null;
+      }
+    }).then((result)=>{
+      if(result.committed && result.snapshot.val()!==null) {
+        waitingRef=waitRoot.child(pid);
+        waitingRef.onDisconnect().remove();
+        document.getElementById("statusMsg").innerText="🌀 WAITING FOR OPPONENT...";
+      }
+    });
 
-function startMulti(){
-mode="MULTI";
-document.getElementById("menu").classList.add("hidden");
-document.getElementById("game").classList.remove("hidden");
+    let cb=snap=>{
+      let g=snap.val();
+      if(g&&g.players&&g.players.X===pid&&mySymbol===null){
+        mySymbol="X"; connectGame(snap.key,pid);
+      }
+    };
+    db.ref("games").on("child_added",cb);
+    gamesListener=cb;
+  }
 
-const id="p_"+Math.random().toString(36).substr(2,9);
-const wait=db.ref("waiting");
+  function connectGame(gameId,playerId) {
+    if(waitingRef){ waitingRef.remove(); waitingRef=null; }
+    gameRef=db.ref("games/"+gameId);
+    
+    gameRef.child("players/"+mySymbol).onDisconnect().set(null);
+    
+    let valCb=snap=>{
+      let g=snap.val();
+      if(!g) {
+        document.getElementById("statusMsg").innerText="❌ GAME ENDED";
+        board=["","","","","","","","",""]; current="X"; render();
+        return;
+      }
+      board=g.board||["","","","","","","","",""];
+      current=g.turn||"X";
+      updateUI();
+      if(winner()) triggerInterstitial();
+    };
+    gameRef.on("value",valCb);
+    gameListener=valCb;
+  }
 
-wait.once("value",snap=>{
-if(!snap.exists()){
-wait.child(id).set(true);
-wait.child(id).onDisconnect().remove();
-document.getElementById("status").innerText="Waiting for opponent...";
-}else{
-const opp=Object.keys(snap.val())[0];
-const gId=db.ref("games").push().key;
-
-db.ref("games/"+gId).set({
-board:["","","","","","","","",""],
-turn:"X",
-players:{X:opp,O:id}
-});
-
-wait.child(opp).remove();
-mySymbol="O";
-connectGame(gId);
-}
-});
-
-db.ref("games").on("child_added",snap=>{
-const g=snap.val();
-if(g.players&&g.players.X===id){
-mySymbol="X";
-connectGame(snap.key);
-}
-});
-}
-
-function connectGame(id){
-gameRef=db.ref("games/"+id);
-
-gameRef.on("value",snap=>{
-const g=snap.val();
-if(!g) return;
-board=g.board;
-current=g.turn;
-update();
-});
-}
+  window.onload=()=>{
+    document.getElementById("aiModeBtn").onclick=startAI;
+    document.getElementById("multiModeBtn").onclick=startMulti;
+    document.getElementById("restartGameBtn").onclick=reset;
+    document.getElementById("exitGameBtn").onclick=exit;
+  };
+  window.move=move; window.reset=reset; window.exit=exit;
 </script>
-
-<!-- 🔥 MONETAG AD SCRIPT HERE (PASTE YOUR REAL SCRIPT BELOW) -->
-<!-- Example:
-<script src="https://your-monetag-ad-unit.js"></script>
--->
 
 </body>
 </html>
