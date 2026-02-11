@@ -2,359 +2,263 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Neon Tic Tac Toe Multiplayer</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="monetag" content="7ee86319317a689bfde0cb6456147758">
+<title>Tic Tac Toe Pro</title>
 
-<!-- Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <style>
-/* ================= THEME ================= */
-body {
-  margin:0;
-  font-family:'Orbitron',sans-serif;
-  background:radial-gradient(circle at top,#1a0033,#050010);
-  color:#fff;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
+body{
+margin:0;
+font-family:'Orbitron',sans-serif;
+background:radial-gradient(circle at top,#1a0033,#050010);
+color:#fff;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
 }
 
-.hidden { display:none; }
-
-button {
-  background:#111;
-  color:#fff;
-  border:2px solid #00f6ff;
-  padding:12px 25px;
-  font-size:16px;
-  cursor:pointer;
-  border-radius:8px;
-  text-shadow:0 0 8px #00f6ff;
-  box-shadow:0 0 15px #00f6ff;
+.container{
+text-align:center;
+width:360px;
 }
 
-button:hover {
-  box-shadow:0 0 25px #00f6ff;
+h1{
+margin-bottom:20px;
 }
 
-/* ================= START SCREEN ================= */
-#startScreen {
-  text-align:center;
+button{
+background:#111;
+color:#fff;
+border:2px solid #00f6ff;
+padding:10px 20px;
+margin:5px;
+cursor:pointer;
+border-radius:8px;
+box-shadow:0 0 15px #00f6ff;
 }
 
-/* ================= GAME SCREEN ================= */
-#gameScreen {
-  width:360px;
+button:hover{
+box-shadow:0 0 25px #00f6ff;
 }
 
-/* Player Display */
-.players {
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:10px;
-}
-.player {
-  width:48%;
-  padding:10px;
-  text-align:center;
-  border-radius:8px;
-}
-.player.x {
-  border:2px solid #00f6ff;
-  box-shadow:0 0 15px #00f6ff;
-}
-.player.o {
-  border:2px solid #ff2cff;
-  box-shadow:0 0 15px #ff2cff;
+.board{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
+margin-top:20px;
 }
 
-/* Status */
-#status {
-  text-align:center;
-  margin:10px 0;
+.cell{
+height:100px;
+background:#0b001a;
+border:2px solid #6b21a8;
+font-size:40px;
+display:flex;
+justify-content:center;
+align-items:center;
+cursor:pointer;
 }
 
-/* Board */
-.board {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  margin:15px 0;
+.status{
+margin-top:15px;
+font-size:14px;
 }
-.cell {
-  height:100px;
-  background:#0b001a;
-  border:2px solid #6b21a8;
-  box-shadow:0 0 15px #6b21a8;
-  font-size:48px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  cursor:pointer;
-}
-
-.cell.x {
-  color:#00f6ff;
-  text-shadow:0 0 20px #00f6ff;
-}
-.cell.o {
-  color:#ff2cff;
-  text-shadow:0 0 20px #ff2cff;
-}
-
-/* Pop animation */
-.cell span {
-  animation:pop .2s ease-out;
-}
-@keyframes pop {
-  from { transform:scale(0); }
-  to { transform:scale(1); }
-}
-
-/* Controls */
-.controls {
-  display:flex;
-  justify-content:space-between;
-  margin-top:10px;
-}
-
-/* Pulse animation */
-.pulse {
-  animation:pulse 1s infinite;
-}
-@keyframes pulse {
-  0% { box-shadow:0 0 10px #ff2cff; }
-  50% { box-shadow:0 0 30px #ff2cff; }
-  100% { box-shadow:0 0 10px #ff2cff; }
-}
-
-/* ================= CHAT ================= */
-.chat {
-  margin-top:15px;
-  background:#050010;
-  border:2px solid #00f6ff;
-  border-radius:8px;
-  padding:5px;
-}
-#messages {
-  height:120px;
-  overflow-y:auto;
-  font-size:13px;
-}
-.msg {
-  margin:5px;
-  padding:6px 10px;
-  border-radius:8px;
-  max-width:80%;
-}
-.me {
-  background:#ff2cff;
-  margin-left:auto;
-}
-.other {
-  background:#00f6ff;
-  color:#000;
-}
-.chatInput {
-  display:flex;
-}
-.chatInput input {
-  flex:1;
-  padding:8px;
-  background:#111;
-  border:none;
-  color:#fff;
-}
+.hidden{display:none;}
 </style>
 </head>
 
 <body>
 
-<!-- START SCREEN -->
-<div id="startScreen">
-  <h1>⚡ Neon Tic Tac Toe</h1>
-  <button onclick="startGame()">Start Game</button>
+<div class="container">
+
+<h1>⚡ Tic Tac Toe Pro</h1>
+
+<div id="menu">
+<button onclick="startAI()">Play vs AI</button>
+<button onclick="startMulti()">Play Multiplayer</button>
 </div>
 
-<!-- GAME SCREEN -->
-<div id="gameScreen" class="hidden">
-  <div class="players">
-    <div class="player o">Player O</div>
-    <div class="player x">Player X</div>
-  </div>
+<div id="game" class="hidden">
+<div id="board" class="board"></div>
+<div id="status" class="status"></div>
+<button onclick="resetGame()">Restart</button>
+<button onclick="location.reload()">Back</button>
+</div>
 
-  <div id="status">Waiting for opponent...</div>
-
-  <div class="board" id="board"></div>
-
-  <div class="controls">
-    <button id="againBtn" onclick="playAgain()">Play Again</button>
-    <button onclick="endGame()">End Game</button>
-  </div>
-
-  <!-- CHAT -->
-  <div class="chat">
-    <div id="messages"></div>
-    <div class="chatInput">
-      <input id="chatInput" placeholder="Type message">
-      <button onclick="sendMsg()">Send</button>
-    </div>
-  </div>
 </div>
 
 <script>
 /* ================= FIREBASE ================= */
 
-// <<< PASTE YOUR FIREBASE CONFIGURATION OBJECT HERE >>>
 const firebaseConfig = {
-  apiKey: "AIzaSyDCmXCdvLV8--2ZXYmCpAgLR3cogj0cGG8",
-  authDomain: "freegm-4601f.firebaseapp.com",
-  databaseURL: "https://freegm-4601f-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "freegm-4601f",
-  storageBucket: "freegm-4601f.firebasestorage.app",
-  messagingSenderId: "30234171811",
-  appId: "1:30234171811:web:70a6c3cfd365a874cfa216"
+apiKey: "AIzaSyDCmXCdvLV8--2ZXYmCpAgLR3cogj0cGG8",
+authDomain: "freegm-4601f.firebaseapp.com",
+databaseURL: "https://freegm-4601f-default-rtdb.asia-southeast1.firebasedatabase.app",
+projectId: "freegm-4601f",
+storageBucket: "freegm-4601f.appspot.com",
+messagingSenderId: "30234171811",
+appId: "1:30234171811:web:70a6c3cfd365a874cfa216"
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const db=firebase.database();
 
-/* ================= GAME STATE ================= */
-let playerId = "p_" + Math.random().toString(36).substr(2,9);
-let gameId = null;
-let mySymbol = null;
-let gameRef = null;
+/* ================= GAME ================= */
 
-/* ================= MATCHMAKING ================= */
-function startGame() {
-  document.getElementById("startScreen").classList.add("hidden");
-  document.getElementById("gameScreen").classList.remove("hidden");
+let board=["","","","","","","","",""];
+let current="X";
+let mode="";
+let gameRef=null;
+let mySymbol=null;
 
-  const waitingRef = db.ref("waitingPlayers");
-  waitingRef.once("value", snap => {
-    if (!snap.exists()) {
-      waitingRef.child(playerId).set(true);
-      waitingRef.child(playerId).onDisconnect().remove();
-      document.getElementById("status").innerText="Waiting for opponent...";
-    } else {
-      const opponent = Object.keys(snap.val())[0];
-      gameId = db.ref("games").push().key;
+const winComb=[
+[0,1,2],[3,4,5],[6,7,8],
+[0,3,6],[1,4,7],[2,5,8],
+[0,4,8],[2,4,6]
+];
 
-      db.ref("games/"+gameId).set({
-        board:["","","","","","","","",""],
-        turn:"X",
-        players:{X:opponent,O:playerId},
-        status:"playing",
-        rematch:{}
-      });
-
-      waitingRef.child(opponent).remove();
-      mySymbol="O";
-      initGame();
-    }
-  });
-
-  db.ref("games").on("child_added", snap => {
-    const g = snap.val();
-    if (g.players && g.players.X===playerId) {
-      gameId=snap.key;
-      mySymbol="X";
-      initGame();
-    }
-  });
+function createBoard(){
+const b=document.getElementById("board");
+b.innerHTML="";
+board.forEach((v,i)=>{
+const c=document.createElement("div");
+c.className="cell";
+c.innerText=v;
+c.onclick=()=>move(i);
+b.appendChild(c);
+});
 }
 
-/* ================= GAME INIT ================= */
-function initGame() {
-  gameRef=db.ref("games/"+gameId);
-  document.getElementById("status").innerText="Game Started";
-
-  const board=document.getElementById("board");
-  board.innerHTML="";
-  for(let i=0;i<9;i++){
-    const c=document.createElement("div");
-    c.className="cell";
-    c.onclick=()=>makeMove(i);
-    board.appendChild(c);
-  }
-
-  gameRef.on("value", snap=>{
-    const g=snap.val();
-    if(!g) return;
-    updateBoard(g.board);
-    updateStatus(g);
-  });
-
-  listenChat();
+function checkWin(){
+for(let c of winComb){
+if(board[c[0]]&&board[c[0]]===board[c[1]]&&board[c[1]]===board[c[2]]){
+return board[c[0]];
+}
+}
+if(!board.includes("")) return "draw";
+return null;
 }
 
-/* ================= GAME LOGIC ================= */
-function makeMove(i){
-  gameRef.transaction(g=>{
-    if(!g||g.status!=="playing") return g;
-    if(g.board[i]!==""||g.turn!==mySymbol) return g;
-    g.board[i]=mySymbol;
-    g.turn=mySymbol==="X"?"O":"X";
-    return g;
-  });
+function move(i){
+if(board[i]!==""||checkWin()) return;
+
+if(mode==="AI"){
+board[i]=current;
+current="O";
+aiMove();
+}else{
+if(current!==mySymbol) return;
+gameRef.transaction(g=>{
+if(!g||g.board[i]!==""||g.turn!==mySymbol) return g;
+g.board[i]=mySymbol;
+g.turn=mySymbol==="X"?"O":"X";
+return g;
+});
+}
+update();
 }
 
-function updateBoard(board){
-  document.querySelectorAll(".cell").forEach((c,i)=>{
-    c.innerHTML="";
-    if(board[i]){
-      c.classList.add(board[i].toLowerCase());
-      c.innerHTML="<span>"+board[i]+"</span>";
-    }
-  });
+function aiMove(){
+let empty=board.map((v,i)=>v===""?i:null).filter(v=>v!==null);
+if(empty.length===0) return;
+let r=empty[Math.floor(Math.random()*empty.length)];
+board[r]="O";
+current="X";
+update();
 }
 
-function updateStatus(g){
-  if(g.status==="playing"){
-    document.getElementById("status").innerText =
-      g.turn===mySymbol?"Your Turn":"Opponent Turn";
-  }
+function update(){
+createBoard();
+let w=checkWin();
+if(w){
+document.getElementById("status").innerText=
+w==="draw"?"Match Draw":w+" Wins!";
+}else{
+document.getElementById("status").innerText=
+mode==="AI"?(current==="X"?"Your Turn":"AI Turn"):
+(current===mySymbol?"Your Turn":"Opponent Turn");
+}
 }
 
-/* ================= REMATCH ================= */
-function playAgain(){
-  gameRef.child("rematch/"+mySymbol).set(true);
+function resetGame(){
+board=["","","","","","","","",""];
+current="X";
+update();
 }
 
-/* ================= END ================= */
-function endGame(){
-  if(gameRef) gameRef.remove();
-  location.reload();
+/* ================= AI MODE ================= */
+
+function startAI(){
+mode="AI";
+document.getElementById("menu").classList.add("hidden");
+document.getElementById("game").classList.remove("hidden");
+createBoard();
+update();
 }
 
-/* ================= CHAT ================= */
-function sendMsg(){
-  const msg=document.getElementById("chatInput").value;
-  if(!msg) return;
-  db.ref("games/"+gameId+"/chat").push({
-    from:mySymbol,
-    text:msg
-  });
-  document.getElementById("chatInput").value="";
+/* ================= MULTIPLAYER ================= */
+
+function startMulti(){
+mode="MULTI";
+document.getElementById("menu").classList.add("hidden");
+document.getElementById("game").classList.remove("hidden");
+
+const id="p_"+Math.random().toString(36).substr(2,9);
+const wait=db.ref("waiting");
+
+wait.once("value",snap=>{
+if(!snap.exists()){
+wait.child(id).set(true);
+wait.child(id).onDisconnect().remove();
+document.getElementById("status").innerText="Waiting for opponent...";
+}else{
+const opp=Object.keys(snap.val())[0];
+const gId=db.ref("games").push().key;
+
+db.ref("games/"+gId).set({
+board:["","","","","","","","",""],
+turn:"X",
+players:{X:opp,O:id}
+});
+
+wait.child(opp).remove();
+mySymbol="O";
+connectGame(gId);
+}
+});
+
+db.ref("games").on("child_added",snap=>{
+const g=snap.val();
+if(g.players&&g.players.X===id){
+mySymbol="X";
+connectGame(snap.key);
+}
+});
 }
 
-function listenChat(){
-  db.ref("games/"+gameId+"/chat").on("child_added", snap=>{
-    const m=snap.val();
-    const div=document.createElement("div");
-    div.className="msg "+(m.from===mySymbol?"me":"other");
-    div.innerText=m.text;
-    const box=document.getElementById("messages");
-    box.appendChild(div);
-    box.scrollTop=box.scrollHeight;
-  });
+function connectGame(id){
+gameRef=db.ref("games/"+id);
+
+gameRef.on("value",snap=>{
+const g=snap.val();
+if(!g) return;
+board=g.board;
+current=g.turn;
+update();
+});
 }
 </script>
+
+<!-- 🔥 MONETAG AD SCRIPT HERE (PASTE YOUR REAL SCRIPT BELOW) -->
+<!-- Example:
+<script src="https://your-monetag-ad-unit.js"></script>
+-->
+
 </body>
 </html>
