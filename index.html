@@ -12,6 +12,7 @@
   <!-- Firebase v8.10.0 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -31,7 +32,6 @@
     .action-btn:hover { background: #c026d0; border-color: cyan; box-shadow: 0 0 35px cyan; }
     .hidden { display: none !important; }
     .ad-footer { margin-top: 35px; padding-top: 15px; border-top: 1px dashed #38bdf8; text-align: center; font-size: 9px; color: #6b7280; letter-spacing: 4px; }
-    @media (max-width: 450px) { .container { padding: 20px; } .cell { font-size: 48px; } h1 { font-size: 22px; } }
   </style>
 </head>
 <body>
@@ -50,10 +50,11 @@
     </div>
   </div>
   
-  <!-- ✅ MONETAG OFFICIAL ZONE - SAFE, HIGH EARNING -->
+  <!-- ✅ MONETAG OFFICIAL ZONE + INTERSTITIAL -->
   <div class="ad-footer">
     <span>◈ MONETAG · OFFICIAL ◈</span>
     <script src="https://publisher.monetag.com/zone/210346?source=direct" async data-cfasync="false"></script>
+    <script async src="https://publisher.monetag.com/pixel/210346/interstitial.js" data-cfasync="false"></script>
   </div>
 </div>
 
@@ -90,11 +91,11 @@
     [0,4,8],[2,4,6]
   ];
 
-  // ---------- SAFE INTERSTITIAL (ONCE PER SESSION) ----------
+  // ---------- MONETAG INTERSTITIAL ----------
   function triggerInterstitial() {
-    if (!adShown && typeof mntg !== 'undefined' && mntg.showInterstitial) {
+    if (!adShown && typeof monetagInterstitial !== 'undefined') {
       adShown = true;
-      try { mntg.showInterstitial(); } catch (e) {}
+      try { monetagInterstitial.show(); } catch (e) {}
     }
   }
 
@@ -102,182 +103,197 @@
     const el = document.getElementById("boardGrid");
     el.innerHTML = "";
     board.forEach((val,i)=>{
-      const c=document.createElement("div");
-      c.className="cell";
-      c.textContent=val;
-      c.onclick=()=>move(i);
+      const c = document.createElement("div");
+      c.className = "cell";
+      c.textContent = val;
+      c.onclick = ()=> move(i);
       el.appendChild(c);
     });
   }
 
   function winner() {
-    for(let p of winPatterns) if(board[p[0]]&&board[p[0]]===board[p[1]]&&board[p[1]]===board[p[2]]) return board[p[0]];
-    return board.includes("")?null:"draw";
+    for(let p of winPatterns) if(board[p[0]] && board[p[0]]===board[p[1]] && board[p[1]]===board[p[2]]) return board[p[0]];
+    return board.includes("") ? null : "draw";
   }
 
   function glowWinner() {
-    for(let p of winPatterns) if(board[p[0]]&&board[p[0]]===board[p[1]]&&board[p[1]]===board[p[2]]) {
-      document.querySelectorAll(".cell").forEach((c,i)=>{if(p.includes(i))c.classList.add("win-glow");});
+    for(let p of winPatterns) if(board[p[0]] && board[p[0]]===board[p[1]] && board[p[1]]===board[p[2]]) {
+      document.querySelectorAll(".cell").forEach((c,i)=>{ if(p.includes(i)) c.classList.add("win-glow"); });
       break;
     }
   }
 
   function aiMove() {
-    for(let i=0;i<9;i++)if(board[i]===""){board[i]="O";if(winner()==="O"){board[i]="";return i;}board[i]="";}
-    for(let i=0;i<9;i++)if(board[i]===""){board[i]="X";if(winner()==="X"){board[i]="";return i;}board[i]="";}
+    for(let i=0;i<9;i++) if(board[i]===""){ board[i]="O"; if(winner()==="O"){ board[i]=""; return i; } board[i]=""; }
+    for(let i=0;i<9;i++) if(board[i]===""){ board[i]="X"; if(winner()==="X"){ board[i]=""; return i; } board[i]=""; }
     if(board[4]==="") return 4;
-    let c=[0,2,6,8].filter(i=>board[i]===""); if(c.length) return c[Math.random()*c.length|0];
-    let e=board.map((v,i)=>v===""?i:null).filter(v=>v!==null); return e.length?e[Math.random()*e.length|0]:null;
+    let c = [0,2,6,8].filter(i=>board[i]===""); if(c.length) return c[Math.random()*c.length|0];
+    let e = board.map((v,i)=> v===""?i:null).filter(v=>v!==null);
+    return e.length ? e[Math.random()*e.length|0] : null;
   }
 
   function aiTurn() {
-    if(mode!=="AI"||current!=="O"||winner()) return;
+    if(mode!=="AI" || current!=="O" || winner()) return;
     if(aiTimer) clearTimeout(aiTimer);
-    aiTimer=setTimeout(()=>{
-      if(mode==="AI"&current==="O"&&!winner()){
-        let idx=aiMove();
-        if(idx!==null&&board[idx]===""){
+    aiTimer = setTimeout(()=>{
+      if(mode==="AI" && current==="O" && !winner()){
+        let idx = aiMove();
+        if(idx!==null && board[idx]===""){
           board[idx]="O"; current="X"; updateUI();
           if(winner()) triggerInterstitial();
         }
       }
-    },320);
+    }, 320);
   }
 
   function move(i) {
-    if(board[i]!==""||winner()) return;
+    if(board[i]!=="" || winner()) return;
     if(mode==="AI"){
       if(current!=="X") return;
       board[i]="X"; current="O"; updateUI();
       if(winner()){ triggerInterstitial(); return; }
       aiTurn();
     } else if(mode==="MULTI"){
-      if(!gameRef||current!==mySymbol) return;
+      if(!gameRef || current!==mySymbol || !firebase.auth().currentUser) return;
       gameRef.transaction(g=>{
-        if(!g||g.board[i]!==""||g.turn!==mySymbol) return;
-        g.board[i]=mySymbol; g.turn=mySymbol==="X"?"O":"X"; return g;
+        if(!g || g.board[i]!=="" || g.turn!==mySymbol) return;
+        g.board[i] = mySymbol;
+        g.turn = mySymbol==="X" ? "O" : "X";
+        return g;
       });
     }
   }
 
   function updateUI() {
     render();
-    let w=winner();
-    let s=document.getElementById("statusMsg");
+    let w = winner();
+    let s = document.getElementById("statusMsg");
     if(w){
-      if(w==="draw") s.innerText="✨ DRAW ✨";
-      else{ s.innerText=`🏆 ${w} VICTORY`; glowWinner(); }
+      if(w==="draw") s.innerText = "✨ DRAW ✨";
+      else{ s.innerText = `🏆 ${w} VICTORY`; glowWinner(); }
     } else {
-      if(mode==="AI") s.innerText=current==="X"?"🌀 YOUR TURN":"🤖 AI TURN";
+      if(mode==="AI") s.innerText = current==="X" ? "🌀 YOUR TURN" : "🤖 AI TURN";
       else if(mode==="MULTI"){
-        if(!mySymbol) s.innerText="🔗 MATCHMAKING...";
-        else s.innerText=current===mySymbol?`⚔️ YOUR TURN (${mySymbol})`:`⏳ OPPONENT (${current})`;
+        if(!mySymbol) s.innerText = "🔮 LOBBY · SEARCHING...";
+        else s.innerText = current===mySymbol ? `⚔️ YOUR TURN (${mySymbol})` : `⏳ OPPONENT (${current})`;
       }
     }
   }
 
   function reset() {
     if(aiTimer) clearTimeout(aiTimer);
-    board=["","","","","","","","",""]; current="X";
-    if(mode==="MULTI"&&gameRef) gameRef.update({board:["","","","","","","","",""],turn:"X"});
+    board = ["","","","","","","","",""]; current = "X";
+    if(mode==="MULTI" && gameRef) gameRef.update({board:["","","","","","","","",""], turn:"X"});
     else updateUI();
   }
 
   function exit() {
     if(aiTimer) clearTimeout(aiTimer);
-    if(gameListener&&gameRef){ gameRef.off("value",gameListener); gameListener=null; }
-    if(gamesListener){ db.ref("games").off("child_added",gamesListener); gamesListener=null; }
+    if(gameListener && gameRef){ gameRef.off("value", gameListener); gameListener = null; }
+    if(gamesListener){ db.ref("games").off("child_added", gamesListener); gamesListener = null; }
     
-    if(gameRef&&mySymbol) {
+    if(gameRef && mySymbol && firebase.auth().currentUser) {
       gameRef.child("players/"+mySymbol).onDisconnect().cancel();
       gameRef.child("players/"+mySymbol).set(null);
     }
-    if(waitingRef){ waitingRef.remove(); waitingRef=null; }
-    if(gameRef){ gameRef=null; }
+    if(waitingRef){ waitingRef.remove(); waitingRef = null; }
+    if(gameRef){ gameRef = null; }
     
-    board=["","","","","","","","",""]; current="X"; mode=""; mySymbol=null;
+    board = ["","","","","","","","",""]; current = "X"; mode = ""; mySymbol = null;
     document.getElementById("menuPanel").classList.remove("hidden");
     document.getElementById("gamePanel").classList.add("hidden");
   }
 
-  function startAI() { exit(); mode="AI"; board=["","","","","","","","",""]; current="X"; 
+  function startAI() { 
+    exit(); 
+    mode = "AI"; 
+    board = ["","","","","","","","",""]; 
+    current = "X"; 
     document.getElementById("menuPanel").classList.add("hidden");
-    document.getElementById("gamePanel").classList.remove("hidden"); updateUI(); }
+    document.getElementById("gamePanel").classList.remove("hidden"); 
+    updateUI(); 
+  }
 
   function startMulti() {
     exit();
-    mode="MULTI"; mySymbol=null; 
-    board=["","","","","","","","",""];
-    document.getElementById("menuPanel").classList.add("hidden");
-    document.getElementById("gamePanel").classList.remove("hidden");
-    document.getElementById("statusMsg").innerText="🔮 LOBBY · SEARCHING";
+    firebase.auth().signInAnonymously().then(() => {
+      mode = "MULTI"; 
+      mySymbol = null; 
+      board = ["","","","","","","","",""];
+      document.getElementById("menuPanel").classList.add("hidden");
+      document.getElementById("gamePanel").classList.remove("hidden");
+      document.getElementById("statusMsg").innerText = "🔮 LOBBY · SEARCHING";
 
-    const pid="p_"+Math.random().toString(36).substr(2,12);
-    const waitRoot=db.ref("waiting");
-    
-    waitRoot.transaction(waitObj=>{
-      if(waitObj===null) {
-        let newWait={}; newWait[pid]=true; return newWait;
-      } else {
-        let opp=Object.keys(waitObj)[0];
-        let gid=db.ref("games").push().key;
-        db.ref("games/"+gid).set({
-          board:["","","","","","","","",""],
-          turn:"X",
-          players:{X:opp,O:pid}
-        });
-        mySymbol="O";
-        connectGame(gid,pid);
-        return null;
-      }
-    }).then((result)=>{
-      if(result.committed && result.snapshot.val()!==null) {
-        waitingRef=waitRoot.child(pid);
-        waitingRef.onDisconnect().remove();
-        document.getElementById("statusMsg").innerText="🌀 WAITING FOR OPPONENT...";
-      }
-    });
+      const pid = firebase.auth().currentUser.uid;
+      const waitRoot = db.ref("waiting");
+      
+      waitRoot.transaction(waitObj => {
+        if(waitObj === null) {
+          let newWait = {}; newWait[pid] = true; return newWait;
+        } else {
+          let opp = Object.keys(waitObj)[0];
+          let gid = db.ref("games").push().key;
+          db.ref("games/"+gid).set({
+            board: ["","","","","","","","",""],
+            turn: "X",
+            players: { X: opp, O: pid }
+          });
+          mySymbol = "O";
+          connectGame(gid, pid);
+          return null;
+        }
+      }).then((result) => {
+        if(result.committed && result.snapshot.val() !== null) {
+          waitingRef = waitRoot.child(pid);
+          waitingRef.onDisconnect().remove();
+          document.getElementById("statusMsg").innerText = "🌀 WAITING FOR OPPONENT...";
+        }
+      });
 
-    let cb=snap=>{
-      let g=snap.val();
-      if(g&&g.players&&g.players.X===pid&&mySymbol===null){
-        mySymbol="X"; connectGame(snap.key,pid);
-      }
-    };
-    db.ref("games").on("child_added",cb);
-    gamesListener=cb;
+      let cb = (snap) => {
+        let g = snap.val();
+        if(g && g.players && g.players.X === pid && mySymbol === null){
+          mySymbol = "X"; 
+          connectGame(snap.key, pid);
+        }
+      };
+      db.ref("games").on("child_added", cb);
+      gamesListener = cb;
+    }).catch(console.error);
   }
 
-  function connectGame(gameId,playerId) {
-    if(waitingRef){ waitingRef.remove(); waitingRef=null; }
-    gameRef=db.ref("games/"+gameId);
+  function connectGame(gameId, playerId) {
+    if(waitingRef){ waitingRef.remove(); waitingRef = null; }
+    gameRef = db.ref("games/"+gameId);
     
     gameRef.child("players/"+mySymbol).onDisconnect().set(null);
     
-    let valCb=snap=>{
-      let g=snap.val();
+    let valCb = (snap) => {
+      let g = snap.val();
       if(!g) {
-        document.getElementById("statusMsg").innerText="❌ GAME ENDED";
-        board=["","","","","","","","",""]; current="X"; render();
+        document.getElementById("statusMsg").innerText = "❌ GAME ENDED";
+        board = ["","","","","","","","",""]; current = "X"; render();
         return;
       }
-      board=g.board||["","","","","","","","",""];
-      current=g.turn||"X";
+      board = g.board || ["","","","","","","","",""];
+      current = g.turn || "X";
       updateUI();
       if(winner()) triggerInterstitial();
     };
-    gameRef.on("value",valCb);
-    gameListener=valCb;
+    gameRef.on("value", valCb);
+    gameListener = valCb;
   }
 
-  window.onload=()=>{
-    document.getElementById("aiModeBtn").onclick=startAI;
-    document.getElementById("multiModeBtn").onclick=startMulti;
-    document.getElementById("restartGameBtn").onclick=reset;
-    document.getElementById("exitGameBtn").onclick=exit;
+  window.onload = () => {
+    document.getElementById("aiModeBtn").onclick = startAI;
+    document.getElementById("multiModeBtn").onclick = startMulti;
+    document.getElementById("restartGameBtn").onclick = reset;
+    document.getElementById("exitGameBtn").onclick = exit;
+    firebase.auth().signInAnonymously().catch(console.error);
   };
-  window.move=move; window.reset=reset; window.exit=exit;
+  window.move = move; 
+  window.reset = reset; 
+  window.exit = exit;
 </script>
-
 </body>
 </html>
