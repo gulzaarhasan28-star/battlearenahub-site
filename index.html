@@ -50,11 +50,10 @@
     </div>
   </div>
   
-  <!-- ✅ MONETAG OFFICIAL ZONE + INTERSTITIAL -->
+  <!-- ✅ MONETAG OFFICIAL ZONE - PUSH NOTIFICATIONS (Zone ID: 10598156) -->
   <div class="ad-footer">
     <span>◈ MONETAG · OFFICIAL ◈</span>
-    <script src="https://publisher.monetag.com/zone/210346?source=direct" async data-cfasync="false"></script>
-    <script async src="https://publisher.monetag.com/pixel/210346/interstitial.js" data-cfasync="false"></script>
+    <script src="https://publisher.monetag.com/zone/10598156?source=direct" async data-cfasync="false"></script>
   </div>
 </div>
 
@@ -91,14 +90,7 @@
     [0,4,8],[2,4,6]
   ];
 
-  // ---------- MONETAG INTERSTITIAL ----------
-  function triggerInterstitial() {
-    if (!adShown && typeof monetagInterstitial !== 'undefined') {
-      adShown = true;
-      try { monetagInterstitial.show(); } catch (e) {}
-    }
-  }
-
+  // ---------- RENDER ----------
   function render() {
     const el = document.getElementById("boardGrid");
     el.innerHTML = "";
@@ -123,6 +115,7 @@
     }
   }
 
+  // ---------- SMART AI ----------
   function aiMove() {
     for(let i=0;i<9;i++) if(board[i]===""){ board[i]="O"; if(winner()==="O"){ board[i]=""; return i; } board[i]=""; }
     for(let i=0;i<9;i++) if(board[i]===""){ board[i]="X"; if(winner()==="X"){ board[i]=""; return i; } board[i]=""; }
@@ -140,18 +133,17 @@
         let idx = aiMove();
         if(idx!==null && board[idx]===""){
           board[idx]="O"; current="X"; updateUI();
-          if(winner()) triggerInterstitial();
         }
       }
     }, 320);
   }
 
+  // ---------- MOVE ----------
   function move(i) {
     if(board[i]!=="" || winner()) return;
     if(mode==="AI"){
       if(current!=="X") return;
       board[i]="X"; current="O"; updateUI();
-      if(winner()){ triggerInterstitial(); return; }
       aiTurn();
     } else if(mode==="MULTI"){
       if(!gameRef || current!==mySymbol || !firebase.auth().currentUser) return;
@@ -164,6 +156,7 @@
     }
   }
 
+  // ---------- UPDATE UI ----------
   function updateUI() {
     render();
     let w = winner();
@@ -180,6 +173,7 @@
     }
   }
 
+  // ---------- RESET ----------
   function reset() {
     if(aiTimer) clearTimeout(aiTimer);
     board = ["","","","","","","","",""]; current = "X";
@@ -187,6 +181,7 @@
     else updateUI();
   }
 
+  // ---------- EXIT ----------
   function exit() {
     if(aiTimer) clearTimeout(aiTimer);
     if(gameListener && gameRef){ gameRef.off("value", gameListener); gameListener = null; }
@@ -204,6 +199,7 @@
     document.getElementById("gamePanel").classList.add("hidden");
   }
 
+  // ---------- START AI ----------
   function startAI() { 
     exit(); 
     mode = "AI"; 
@@ -214,6 +210,7 @@
     updateUI(); 
   }
 
+  // ---------- START MULTIPLAYER ----------
   function startMulti() {
     exit();
     firebase.auth().signInAnonymously().then(() => {
@@ -262,6 +259,7 @@
     }).catch(console.error);
   }
 
+  // ---------- CONNECT GAME ----------
   function connectGame(gameId, playerId) {
     if(waitingRef){ waitingRef.remove(); waitingRef = null; }
     gameRef = db.ref("games/"+gameId);
@@ -278,12 +276,12 @@
       board = g.board || ["","","","","","","","",""];
       current = g.turn || "X";
       updateUI();
-      if(winner()) triggerInterstitial();
     };
     gameRef.on("value", valCb);
     gameListener = valCb;
   }
 
+  // ---------- INIT ----------
   window.onload = () => {
     document.getElementById("aiModeBtn").onclick = startAI;
     document.getElementById("multiModeBtn").onclick = startMulti;
