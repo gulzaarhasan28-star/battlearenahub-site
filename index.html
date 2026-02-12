@@ -1,297 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <!-- ✅ MONETAG OFFICIAL VERIFICATION -->
-  <meta name="monetag" content="c49ccf84380e74c2a3c3a3002e9e8802">
-  <title>⚡ TIC TAC TOE · PRODUCTION GRADE</title>
-  
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-  
-  <!-- Firebase v8.10.0 -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: radial-gradient(circle at 20% 10%, #0b001c, #010002); font-family: 'Orbitron', sans-serif; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 16px; color: white; }
-    .container { max-width: 550px; width: 100%; background: rgba(5, 2, 15, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 60px 60px 40px 40px; padding: 30px 24px; box-shadow: 0 0 50px #00ffff30, 0 0 0 2px #a855f7 inset; }
-    h1 { font-size: 28px; font-weight: 900; text-align: center; letter-spacing: 6px; text-transform: uppercase; background: linear-gradient(45deg, #f0f, #0ff, #f0f); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 20px cyan); margin-bottom: 20px; }
-    .btn-group { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin: 20px 0; }
-    .btn { background: black; border: 2px solid #0ff; color: white; font-family: 'Orbitron', sans-serif; font-weight: 700; padding: 14px 28px; border-radius: 50px; font-size: 16px; letter-spacing: 3px; cursor: pointer; box-shadow: 0 0 15px #0ff; transition: 0.2s; flex: 1 1 160px; }
-    .btn:hover { background: #0ff1; border-color: white; box-shadow: 0 0 40px #0ff, 0 0 20px #0ff inset; }
-    .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 30px 0 20px; }
-    .cell { aspect-ratio: 1/1; background: radial-gradient(circle at 30% 30%, #200040, #050010); border: 2px solid #b300ff; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 58px; font-weight: bold; color: white; text-shadow: 0 0 20px #0ff, 0 0 40px #f0f; box-shadow: 0 0 15px #a020f0; transition: 0.1s; cursor: pointer; }
-    .cell:active { transform: scale(0.92); border-color: cyan; box-shadow: 0 0 45px cyan; }
-    .win-glow { border: 4px solid gold !important; box-shadow: 0 0 60px gold, 0 0 20px orange inset !important; }
-    .status { background: #03000c; border: 1px solid #3b82f6; border-radius: 60px; padding: 16px; margin: 15px 0; text-align: center; font-size: 15px; font-weight: 700; letter-spacing: 2.5px; color: #bff0ff; box-shadow: 0 0 15px #2563eb; backdrop-filter: blur(5px); text-transform: uppercase; }
-    .action-row { display: flex; gap: 14px; margin-top: 10px; }
-    .action-btn { background: #10001c; border: 1.5px solid #f0f; color: white; padding: 12px 18px; border-radius: 40px; font-weight: 700; font-family: 'Orbitron', sans-serif; font-size: 14px; letter-spacing: 2px; cursor: pointer; box-shadow: 0 0 12px #f0f; flex: 1; }
-    .action-btn:hover { background: #c026d0; border-color: cyan; box-shadow: 0 0 35px cyan; }
-    .hidden { display: none !important; }
-    .ad-footer { margin-top: 35px; padding-top: 15px; border-top: 1px dashed #38bdf8; text-align: center; font-size: 9px; color: #6b7280; letter-spacing: 4px; }
-  </style>
+<!-- MONETAG VERIFICATION -->
+<meta name="monetag" content="c49ccf84380e74c2a3c3a3002e9e8802">
+
+<title>⚡ TIC TAC TOE · PRODUCTION</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(circle at 20% 10%,#0b001c,#010002);font-family:'Orbitron',sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:16px;color:white}
+.container{max-width:550px;width:100%;background:rgba(5,2,15,.8);backdrop-filter:blur(20px);border:1px solid rgba(0,255,255,.3);border-radius:60px 60px 40px 40px;padding:30px 24px;box-shadow:0 0 50px #00ffff30,0 0 0 2px #a855f7 inset}
+h1{font-size:26px;font-weight:900;text-align:center;letter-spacing:5px;margin-bottom:20px}
+.btn-group{display:flex;gap:15px;justify-content:center;margin:20px 0}
+.btn{background:black;border:2px solid #0ff;color:white;padding:14px 25px;border-radius:40px;font-weight:700;cursor:pointer;flex:1}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:25px 0}
+.cell{aspect-ratio:1;background:#140022;border:2px solid #b300ff;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:50px;cursor:pointer}
+.status{text-align:center;margin:10px 0}
+.hidden{display:none}
+</style>
 </head>
 <body>
+
 <div class="container">
-  <h1>⚡ PRO T3 · SECURE</h1>
-  <div id="menuPanel" class="btn-group">
-    <button id="aiModeBtn" class="btn">🧠 VS AI</button>
-    <button id="multiModeBtn" class="btn">🌐 ONLINE</button>
-  </div>
-  <div id="gamePanel" class="hidden">
-    <div id="boardGrid" class="board"></div>
-    <div id="statusMsg" class="status">⚡ INITIALIZING</div>
-    <div class="action-row">
-      <button id="restartGameBtn" class="action-btn">⟳ RESTART</button>
-      <button id="exitGameBtn" class="action-btn">⏻ EXIT</button>
-    </div>
-  </div>
-  
-  <!-- ✅ MONETAG OFFICIAL ZONE - PUSH NOTIFICATIONS (Zone ID: 10598156) -->
-  <div class="ad-footer">
-    <span>◈ MONETAG · OFFICIAL ◈</span>
-    <script src="https://publisher.monetag.com/zone/10598156?source=direct" async data-cfasync="false"></script>
-  </div>
+<h1>⚡ PRO T3</h1>
+
+<div id="menuPanel" class="btn-group">
+<button id="aiModeBtn" class="btn">VS AI</button>
+<button id="multiModeBtn" class="btn">ONLINE</button>
 </div>
 
+<div id="gamePanel" class="hidden">
+<div id="boardGrid" class="board"></div>
+<div id="statusMsg" class="status"></div>
+<div class="btn-group">
+<button id="restartGameBtn" class="btn">RESTART</button>
+<button id="exitGameBtn" class="btn">EXIT</button>
+</div>
+</div>
+</div>
+
+<script src="https://quge5.com/88/tag.min.js" data-zone="210374" async data-cfasync="false"></script>
+<script src="https://publisher.monetag.com/zone/10598156" async></script>
+
 <script>
-  // ---------- FIREBASE ----------
-  const firebaseConfig = {
-    apiKey: "AIzaSyDCmXCdvLV8--2ZXYmCpAgLR3cogj0cGG8",
-    authDomain: "freegm-4601f.firebaseapp.com",
-    databaseURL: "https://freegm-4601f-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "freegm-4601f",
-    storageBucket: "freegm-4601f.appspot.com",
-    messagingSenderId: "30234171811",
-    appId: "1:30234171811:web:70a6c3cfd365a874cfa216"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+// FIREBASE CONFIG
+const firebaseConfig={
+apiKey:"AIzaSyDCmXCdvLV8--2ZXYmCpAgLR3cogj0cGG8",
+authDomain:"freegm-4601f.firebaseapp.com",
+databaseURL:"https://freegm-4601f-default-rtdb.asia-southeast1.firebasedatabase.app",
+projectId:"freegm-4601f",
+storageBucket:"freegm-4601f.appspot.com",
+messagingSenderId:"30234171811",
+appId:"1:30234171811:web:70a6c3cfd365a874cfa216"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
 
-  // ---------- STATE ----------
-  let board = ["","","","","","","","",""];
-  let current = "X";
-  let mode = "";
-  let mySymbol = null;
-  let gameRef = null;
-  let waitingRef = null;
-  let aiTimer = null;
-  let gameListener = null;
-  let gamesListener = null;
-  
-  let adShown = false;
+let board=["","","","","","","","",""];
+let current="X";
+let mode="";
+let mySymbol=null;
+let gameRef=null;
 
-  const winPatterns = [
-    [0,1,2],[3,4,5],[6,7,8],
-    [0,3,6],[1,4,7],[2,5,8],
-    [0,4,8],[2,4,6]
-  ];
+const winPatterns=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 
-  // ---------- RENDER ----------
-  function render() {
-    const el = document.getElementById("boardGrid");
-    el.innerHTML = "";
-    board.forEach((val,i)=>{
-      const c = document.createElement("div");
-      c.className = "cell";
-      c.textContent = val;
-      c.onclick = ()=> move(i);
-      el.appendChild(c);
-    });
-  }
+function render(){
+const el=document.getElementById("boardGrid");
+el.innerHTML="";
+board.forEach((v,i)=>{
+const c=document.createElement("div");
+c.className="cell";
+c.textContent=v;
+c.onclick=()=>move(i);
+el.appendChild(c);
+});
+}
 
-  function winner() {
-    for(let p of winPatterns) if(board[p[0]] && board[p[0]]===board[p[1]] && board[p[1]]===board[p[2]]) return board[p[0]];
-    return board.includes("") ? null : "draw";
-  }
+function winner(){
+for(let p of winPatterns)
+if(board[p[0]]&&board[p[0]]===board[p[1]]&&board[p[1]]===board[p[2]])
+return board[p[0]];
+return board.includes("")?null:"draw";
+}
 
-  function glowWinner() {
-    for(let p of winPatterns) if(board[p[0]] && board[p[0]]===board[p[1]] && board[p[1]]===board[p[2]]) {
-      document.querySelectorAll(".cell").forEach((c,i)=>{ if(p.includes(i)) c.classList.add("win-glow"); });
-      break;
-    }
-  }
+function updateUI(){
+render();
+let w=winner();
+let s=document.getElementById("statusMsg");
+if(w){
+s.innerText=w==="draw"?"DRAW":w+" WINS";
+}else{
+s.innerText=current+"'s TURN";
+}
+}
 
-  // ---------- SMART AI ----------
-  function aiMove() {
-    for(let i=0;i<9;i++) if(board[i]===""){ board[i]="O"; if(winner()==="O"){ board[i]=""; return i; } board[i]=""; }
-    for(let i=0;i<9;i++) if(board[i]===""){ board[i]="X"; if(winner()==="X"){ board[i]=""; return i; } board[i]=""; }
-    if(board[4]==="") return 4;
-    let c = [0,2,6,8].filter(i=>board[i]===""); if(c.length) return c[Math.random()*c.length|0];
-    let e = board.map((v,i)=> v===""?i:null).filter(v=>v!==null);
-    return e.length ? e[Math.random()*e.length|0] : null;
-  }
+function aiMove(){
+let empty=board.map((v,i)=>v===""?i:null).filter(v=>v!==null);
+return empty[Math.random()*empty.length|0];
+}
 
-  function aiTurn() {
-    if(mode!=="AI" || current!=="O" || winner()) return;
-    if(aiTimer) clearTimeout(aiTimer);
-    aiTimer = setTimeout(()=>{
-      if(mode==="AI" && current==="O" && !winner()){
-        let idx = aiMove();
-        if(idx!==null && board[idx]===""){
-          board[idx]="O"; current="X"; updateUI();
-        }
-      }
-    }, 320);
-  }
+function move(i){
+if(board[i]!==""||winner())return;
+if(mode==="AI"){
+board[i]=current;
+current=current==="X"?"O":"X";
+updateUI();
+if(current==="O"&&!winner()){
+let idx=aiMove();
+board[idx]="O";
+current="X";
+updateUI();
+}
+}
+}
 
-  // ---------- MOVE ----------
-  function move(i) {
-    if(board[i]!=="" || winner()) return;
-    if(mode==="AI"){
-      if(current!=="X") return;
-      board[i]="X"; current="O"; updateUI();
-      aiTurn();
-    } else if(mode==="MULTI"){
-      if(!gameRef || current!==mySymbol || !firebase.auth().currentUser) return;
-      gameRef.transaction(g=>{
-        if(!g || g.board[i]!=="" || g.turn!==mySymbol) return;
-        g.board[i] = mySymbol;
-        g.turn = mySymbol==="X" ? "O" : "X";
-        return g;
-      });
-    }
-  }
+function reset(){
+board=["","","","","","","","",""];
+current="X";
+updateUI();
+}
 
-  // ---------- UPDATE UI ----------
-  function updateUI() {
-    render();
-    let w = winner();
-    let s = document.getElementById("statusMsg");
-    if(w){
-      if(w==="draw") s.innerText = "✨ DRAW ✨";
-      else{ s.innerText = `🏆 ${w} VICTORY`; glowWinner(); }
-    } else {
-      if(mode==="AI") s.innerText = current==="X" ? "🌀 YOUR TURN" : "🤖 AI TURN";
-      else if(mode==="MULTI"){
-        if(!mySymbol) s.innerText = "🔮 LOBBY · SEARCHING...";
-        else s.innerText = current===mySymbol ? `⚔️ YOUR TURN (${mySymbol})` : `⏳ OPPONENT (${current})`;
-      }
-    }
-  }
+function startAI(){
+mode="AI";
+document.getElementById("menuPanel").classList.add("hidden");
+document.getElementById("gamePanel").classList.remove("hidden");
+reset();
+}
 
-  // ---------- RESET ----------
-  function reset() {
-    if(aiTimer) clearTimeout(aiTimer);
-    board = ["","","","","","","","",""]; current = "X";
-    if(mode==="MULTI" && gameRef) gameRef.update({board:["","","","","","","","",""], turn:"X"});
-    else updateUI();
-  }
+function exitGame(){
+mode="";
+document.getElementById("menuPanel").classList.remove("hidden");
+document.getElementById("gamePanel").classList.add("hidden");
+}
 
-  // ---------- EXIT ----------
-  function exit() {
-    if(aiTimer) clearTimeout(aiTimer);
-    if(gameListener && gameRef){ gameRef.off("value", gameListener); gameListener = null; }
-    if(gamesListener){ db.ref("games").off("child_added", gamesListener); gamesListener = null; }
-    
-    if(gameRef && mySymbol && firebase.auth().currentUser) {
-      gameRef.child("players/"+mySymbol).onDisconnect().cancel();
-      gameRef.child("players/"+mySymbol).set(null);
-    }
-    if(waitingRef){ waitingRef.remove(); waitingRef = null; }
-    if(gameRef){ gameRef = null; }
-    
-    board = ["","","","","","","","",""]; current = "X"; mode = ""; mySymbol = null;
-    document.getElementById("menuPanel").classList.remove("hidden");
-    document.getElementById("gamePanel").classList.add("hidden");
-  }
-
-  // ---------- START AI ----------
-  function startAI() { 
-    exit(); 
-    mode = "AI"; 
-    board = ["","","","","","","","",""]; 
-    current = "X"; 
-    document.getElementById("menuPanel").classList.add("hidden");
-    document.getElementById("gamePanel").classList.remove("hidden"); 
-    updateUI(); 
-  }
-
-  // ---------- START MULTIPLAYER ----------
-  function startMulti() {
-    exit();
-    firebase.auth().signInAnonymously().then(() => {
-      mode = "MULTI"; 
-      mySymbol = null; 
-      board = ["","","","","","","","",""];
-      document.getElementById("menuPanel").classList.add("hidden");
-      document.getElementById("gamePanel").classList.remove("hidden");
-      document.getElementById("statusMsg").innerText = "🔮 LOBBY · SEARCHING";
-
-      const pid = firebase.auth().currentUser.uid;
-      const waitRoot = db.ref("waiting");
-      
-      waitRoot.transaction(waitObj => {
-        if(waitObj === null) {
-          let newWait = {}; newWait[pid] = true; return newWait;
-        } else {
-          let opp = Object.keys(waitObj)[0];
-          let gid = db.ref("games").push().key;
-          db.ref("games/"+gid).set({
-            board: ["","","","","","","","",""],
-            turn: "X",
-            players: { X: opp, O: pid }
-          });
-          mySymbol = "O";
-          connectGame(gid, pid);
-          return null;
-        }
-      }).then((result) => {
-        if(result.committed && result.snapshot.val() !== null) {
-          waitingRef = waitRoot.child(pid);
-          waitingRef.onDisconnect().remove();
-          document.getElementById("statusMsg").innerText = "🌀 WAITING FOR OPPONENT...";
-        }
-      });
-
-      let cb = (snap) => {
-        let g = snap.val();
-        if(g && g.players && g.players.X === pid && mySymbol === null){
-          mySymbol = "X"; 
-          connectGame(snap.key, pid);
-        }
-      };
-      db.ref("games").on("child_added", cb);
-      gamesListener = cb;
-    }).catch(console.error);
-  }
-
-  // ---------- CONNECT GAME ----------
-  function connectGame(gameId, playerId) {
-    if(waitingRef){ waitingRef.remove(); waitingRef = null; }
-    gameRef = db.ref("games/"+gameId);
-    
-    gameRef.child("players/"+mySymbol).onDisconnect().set(null);
-    
-    let valCb = (snap) => {
-      let g = snap.val();
-      if(!g) {
-        document.getElementById("statusMsg").innerText = "❌ GAME ENDED";
-        board = ["","","","","","","","",""]; current = "X"; render();
-        return;
-      }
-      board = g.board || ["","","","","","","","",""];
-      current = g.turn || "X";
-      updateUI();
-    };
-    gameRef.on("value", valCb);
-    gameListener = valCb;
-  }
-
-  // ---------- INIT ----------
-  window.onload = () => {
-    document.getElementById("aiModeBtn").onclick = startAI;
-    document.getElementById("multiModeBtn").onclick = startMulti;
-    document.getElementById("restartGameBtn").onclick = reset;
-    document.getElementById("exitGameBtn").onclick = exit;
-    firebase.auth().signInAnonymously().catch(console.error);
-  };
-  window.move = move; 
-  window.reset = reset; 
-  window.exit = exit;
+window.onload=()=>{
+firebase.auth().signInAnonymously();
+document.getElementById("aiModeBtn").onclick=startAI;
+document.getElementById("restartGameBtn").onclick=reset;
+document.getElementById("exitGameBtn").onclick=exitGame;
+updateUI();
+};
 </script>
+
 </body>
 </html>
